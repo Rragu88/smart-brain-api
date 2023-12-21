@@ -3,28 +3,54 @@ import { ClarifaiStub, grpc } from "clarifai-nodejs-grpc";
 const stub = ClarifaiStub.grpc();
 
 const metadata = new grpc.Metadata();
-metadata.set("authorization", `Key ${process.env.API_KEY}`);
+metadata.set("authorization", `Key ${process.env.PAT}`);
 
 const handleApiCall = (req, res) => {
     stub.PostModelOutputs(
         {
+            user_app_id: {
+                "user_id": process.env.USER_ID,
+                "app_id": process.env.APP_ID
+            },
             model_id: process.env.MODEL_ID,
-            inputs: [{data: {image: {url: req.body.input}}}]
+            inputs: [
+                {
+                    data: {
+                        image: {
+                            url: req.body.input,
+                            allow_duplicate_url: true
+                        }
+                    }
+                }
+            ]
         },
         metadata,
         (err, response) => {
             if (err) {
-                console.log("Error: " + err);
-                return;
+                throw new Error(err);
             }
+
             if (response.status.code !== 10000) {
-                console.log("Received failed status: " + response.status.description + "\n" + response.status.details);
-                return;
+                throw new Error("Post model outputs failed, status: " + response.status.description);
             }
-            console.log("Predicted concepts, with confidence values:");
-            for (const c of response.outputs[0].data.concepts) {
-                console.log(c.name + ": " + c.value);
-            }
+
+            const regions = response.outputs[0].data.regions;
+
+            regions.forEach(region => {
+                const boundingBox = region.region_info.bounding_box;
+                const topRow = boundingBox.top_row.toFixed(3);
+                const leftCol = boundingBox.left_col.toFixed(3);
+                const bottomRow = boundingBox.bottom_row.toFixed(3);
+                const rightCol = boundingBox.right_col.toFixed(3);
+
+                region.data.concepts.forEach(concept => {
+                    const name = concept.name;
+                    const value = concept.value.toFixed(4);
+
+                    console.log(`${name}: ${value} BBox: ${topRow}, ${leftCol}, ${bottomRow}, ${rightCol}`);
+
+                });
+            });
             res.json(response);
         });
 }
