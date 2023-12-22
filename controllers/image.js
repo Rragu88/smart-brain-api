@@ -6,7 +6,6 @@ const metadata = new grpc.Metadata();
 metadata.set("authorization", `Key ${process.env.PAT}`);
 
 const handleApiCall = (req, res) => {
-    console.log(req.body.input);
     stub.PostModelOutputs(
         {
             user_app_id: {
@@ -18,7 +17,7 @@ const handleApiCall = (req, res) => {
                 {
                     data: {
                         image: {
-                            url: req.body.input,
+                            url: 'https://samples.clarifai.com/face-det.jpg',
                             allow_duplicate_url: true
                         }
                     }
