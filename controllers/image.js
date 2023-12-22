@@ -6,7 +6,6 @@ const metadata = new grpc.Metadata();
 metadata.set("authorization", `Key ${process.env.PAT}`);
 
 const handleApiCall = (req, res) => {
-    const IMAGE_URL = `${req.body.input}`;
     stub.PostModelOutputs(
         {
             user_app_id: {
@@ -18,7 +17,7 @@ const handleApiCall = (req, res) => {
                 {
                     data: {
                         image: {
-                            url: IMAGE_URL,
+                            url: req.body.input,
                             allow_duplicate_url: true
                         }
                     }
@@ -32,7 +31,7 @@ const handleApiCall = (req, res) => {
             }
 
             if (response.status.code !== 10000) {
-                throw new Error("Post model outputs failed, status: " + response.status.description);
+                throw new Error("Post model outputs failed, status: " + response.status.description + " " + req.body.input);
             }
 
             const regions = response.outputs[0].data.regions;
