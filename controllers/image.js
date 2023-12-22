@@ -6,6 +6,7 @@ const metadata = new grpc.Metadata();
 metadata.set("authorization", `Key ${process.env.PAT}`);
 
 const handleApiCall = (req, res) => {
+    console.log(req.body.input);
     stub.PostModelOutputs(
         {
             user_app_id: {
