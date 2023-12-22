@@ -17,7 +17,7 @@ const handleApiCall = (req, res) => {
                 {
                     data: {
                         image: {
-                            url: req.body.input.toString(),
+                            url: req.body.input,
                             allow_duplicate_url: true
                         }
                     }
