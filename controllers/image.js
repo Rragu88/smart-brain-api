@@ -17,7 +17,7 @@ const handleApiCall = (req, res) => {
                 {
                     data: {
                         image: {
-                            url: 'https://samples.clarifai.com/face-det.jpg',
+                            url: req.body.input.toString(),
                             allow_duplicate_url: true
                         }
                     }
